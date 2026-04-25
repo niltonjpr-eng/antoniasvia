@@ -21,14 +21,14 @@
             --ios-orange: #FF9500;
             --ios-purple: #AF52DE;
             --ios-teal: #5AC8FA;
-            --ios-bg: #f0f0f5;
-            --ios-bg-2: #e2e2ea;
-            --ios-bg-3: #d5d5e0;
-            --ios-bg-4: #c8c8d5;
+            --ios-bg: #fff8fc;
+            --ios-bg-2: #ffffff;
+            --ios-bg-3: #faf0f6;
+            --ios-bg-4: #f0e4ef;
             --ios-label: #1a1a2e;
-            --ios-label-2: rgba(30,30,60,0.6);
-            --ios-label-3: rgba(30,30,60,0.35);
-            --ios-sep: rgba(100,100,120,0.25);
+            --ios-label-2: rgba(26,26,46,0.6);
+            --ios-label-3: rgba(26,26,46,0.3);
+            --ios-sep: rgba(194,24,91,0.12);
             --ios-fill: rgba(120,120,128,0.2);
             --ios-fill-2: rgba(120,120,128,0.16);
             --ios-radius: 20px;
@@ -37,6 +37,15 @@
             --ios-blur: blur(40px) saturate(180%);
             --ios-shadow: 0 8px 32px rgba(0,0,0,0.5);
             --ios-glow-pink: 0 0 24px rgba(255,45,146,0.35);
+            /* Variáveis de compatibilidade */
+            --primaria: #e91e8c;
+            --sucesso: #34C759;
+            --erro: #FF3B30;
+            --aviso: #FF9500;
+            --fundo-2: #f5eef8;
+            --texto-suave: #6b6b8a;
+            --borda: rgba(194,24,91,0.12);
+            --radius-sm: 13px;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
@@ -92,12 +101,10 @@
         }
         .login-box {
             position: relative; z-index: 1;
-            background: rgba(28,28,30,0.85);
-            backdrop-filter: var(--ios-blur);
-            -webkit-backdrop-filter: var(--ios-blur);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: #ffffff;
+            border: 1px solid rgba(194,24,91,0.15);
             border-radius: 28px; padding: 40px 32px; width: 100%; max-width: 360px;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 60px rgba(194,24,91,0.12);
         }
         .login-logo {
             font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
@@ -105,16 +112,16 @@
             background: linear-gradient(135deg, #FF2D92, #FF9500);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .login-sub { font-size: 12px; color: var(--ios-label-2); margin-bottom: 32px; letter-spacing: 0.5px; }
+        .login-sub { font-size: 12px; color: #999; margin-bottom: 32px; letter-spacing: 0.5px; }
         #input-login {
             padding: 15px 18px; border-radius: 14px;
-            border: 1.5px solid rgba(255,255,255,0.1);
-            background: var(--ios-fill); color: white; width: 100%;
+            border: 1.5px solid rgba(194,24,91,0.2);
+            background: #fff0f7; color: #1a1a2e; width: 100%;
             text-align: center; font-size: 24px; letter-spacing: 10px; margin-bottom: 12px;
             outline: none; font-family: inherit;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        #input-login::placeholder { letter-spacing: 0; font-size: 15px; color: var(--ios-label-3); }
+        #input-login::placeholder { letter-spacing: 0; font-size: 15px; color: #bbb; }
         #input-login:focus { border-color: var(--ios-pink); box-shadow: var(--ios-glow-pink); }
         #input-login.erro { border-color: var(--ios-red); animation: shake 0.4s ease; }
         @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
@@ -131,22 +138,21 @@
 
         /* ============ HEADER MOBILE iOS ============ */
         header {
-            background: rgba(28,28,30,0.85);
-            backdrop-filter: var(--ios-blur);
-            -webkit-backdrop-filter: var(--ios-blur);
-            border-bottom: 0.5px solid var(--ios-sep);
-            color: var(--ios-label);
+            background: #ffffff;
+            border-bottom: 1px solid rgba(194,24,91,0.12);
+            box-shadow: 0 2px 12px rgba(194,24,91,0.06);
+            color: #1a1a2e;
             padding: 0 16px; display: none; justify-content: space-between; align-items: center;
             width: 100%; position: fixed; top: 0; z-index: 998;
             height: 52px;
         }
         #header-nome-loja {
             font-weight: 700; font-size: 17px; letter-spacing: -0.3px;
-            color: var(--ios-label);
+            color: #1a1a2e;
             max-width: 55vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .menu-toggle {
-            background: var(--ios-fill); border: none; color: var(--ios-label); font-size: 17px;
+            background: #f5eef8; border: none; color: #1a1a2e; font-size: 17px;
             cursor: pointer; padding: 7px 10px; border-radius: 10px; line-height: 1;
             transition: opacity 0.15s;
         }
@@ -154,27 +160,26 @@
 
         /* ============ SIDEBAR iOS ============ */
         aside {
-            width: 280px; background: rgba(28,28,30,0.95);
-            backdrop-filter: var(--ios-blur);
-            -webkit-backdrop-filter: var(--ios-blur);
-            color: white; padding: 0; display: flex; flex-direction: column; flex-shrink: 0;
+            width: 280px; background: #ffffff;
+            color: #1a1a2e; padding: 0; display: flex; flex-direction: column; flex-shrink: 0;
             transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999;
-            border-right: 0.5px solid var(--ios-sep);
+            border-right: 1px solid rgba(194,24,91,0.12);
+            box-shadow: 4px 0 20px rgba(194,24,91,0.08);
         }
         .sidebar-logo {
             padding: 32px 20px 18px;
-            border-bottom: 0.5px solid var(--ios-sep);
+            border-bottom: 1px solid rgba(194,24,91,0.1);
         }
         .sidebar-logo h2 {
             font-size: 20px; font-weight: 700; letter-spacing: -0.5px;
             background: linear-gradient(135deg, var(--ios-pink), var(--ios-orange));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        #side-nome-loja { font-size: 13px; color: var(--ios-label-2); margin-top: 3px; }
+        #side-nome-loja { font-size: 13px; color: #999; margin-top: 3px; }
         .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
         .menu-btn {
             width: 100%; padding: 12px 14px; background: none; border: none;
-            color: var(--ios-label-2); text-align: left; cursor: pointer;
+            color: #6b6b8a; text-align: left; cursor: pointer;
             border-radius: 13px; margin-bottom: 2px;
             display: flex; justify-content: space-between; align-items: center;
             font-size: 15px; font-family: inherit; font-weight: 500;
@@ -189,8 +194,8 @@
             min-width: 20px; text-align: center;
         }
         .sidebar-footer {
-            padding: 14px 20px; border-top: 0.5px solid var(--ios-sep);
-            font-size: 11px; color: var(--ios-label-3);
+            padding: 14px 20px; border-top: 1px solid rgba(194,24,91,0.1);
+            font-size: 11px; color: #bbb;
         }
 
         @media (max-width: 768px) {
@@ -371,10 +376,9 @@
         #bottom-nav {
             display: none;
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(28,28,30,0.92);
-            backdrop-filter: var(--ios-blur);
-            -webkit-backdrop-filter: var(--ios-blur);
-            border-top: 0.5px solid var(--ios-sep);
+            background: #ffffff;
+            border-top: 1px solid rgba(194,24,91,0.12);
+            box-shadow: 0 -4px 20px rgba(194,24,91,0.08);
             z-index: 997;
             padding: 8px 4px 28px;
         }
@@ -383,7 +387,7 @@
         }
         .bnav-btn {
             flex: 1; background: none; border: none;
-            color: var(--ios-label-2); cursor: pointer;
+            color: #999; cursor: pointer;
             display: flex; flex-direction: column; align-items: center; gap: 3px;
             padding: 4px 2px;
             border-radius: 12px;
@@ -496,7 +500,7 @@
         <div class="login-sub">SISTEMA DE GESTÃO</div>
         <input type="password" id="input-login" placeholder="Digite sua senha" inputmode="numeric" autocomplete="current-password">
         <button class="btn-login" id="btn-entrar" onclick="verificarSenha()">ENTRAR →</button>
-        <div id="status-loading" style="margin-top:14px; font-size:12px; opacity:0.6; text-align:center;">⏳ Conectando ao sistema...</div>
+        <div id="status-loading" style="margin-top:14px; font-size:12px; opacity:0.6; text-align:center; color:#666;">⏳ Conectando ao sistema...</div>
     </div>
 </div>
 
