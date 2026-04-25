@@ -340,10 +340,81 @@
         .section-header h3 { margin-bottom: 0; }
 
         /* ============ RESPONSIVE ============ */
-        @media (max-width: 500px) {
-            main { padding: 16px; }
-            .card { padding: 18px; }
+        @media (max-width: 600px) {
+            main { padding: 12px; }
+            .card { padding: 14px; border-radius: 10px; }
             .grid, .grid-2 { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-card { padding: 14px; }
+            .stat-card .stat-value { font-size: 18px; }
+            .btn { padding: 14px 18px; font-size: 15px; }
+            .btn-acao { padding: 8px 12px; font-size: 14px; }
+            #v-total-carrinho { font-size: 24px; }
+
+            /* Tabelas viram cards no celular */
+            .tabela-wrapper { border: none; overflow: visible; }
+            table, thead, tbody, th, td, tr { display: block; }
+            thead tr { display: none; }
+            tbody tr {
+                background: white;
+                border: 1px solid var(--borda);
+                border-radius: 10px;
+                margin-bottom: 10px;
+                padding: 12px;
+                position: relative;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+            tbody tr.linha-vencida {
+                border-color: var(--vencido-texto);
+                background: var(--vencido) !important;
+            }
+            tbody td {
+                border: none;
+                padding: 4px 0;
+                font-size: 14px;
+                display: flex;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            tbody td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                font-size: 11px;
+                text-transform: uppercase;
+                color: var(--texto-suave);
+                min-width: 80px;
+                flex-shrink: 0;
+                padding-top: 1px;
+            }
+            tbody td:last-child {
+                margin-top: 8px;
+                padding-top: 10px;
+                border-top: 1px solid var(--borda);
+                flex-wrap: wrap;
+            }
+            /* Cabeçalhos de mês (colspan) ficam como faixa */
+            tbody tr td[colspan] {
+                border: none;
+                border-radius: 8px;
+                padding: 8px 12px;
+                display: block;
+            }
+            tbody tr td[colspan]::before { display: none; }
+
+            /* Toast no topo centralizado */
+            #toast-container { top: 10px; right: 10px; left: 10px; align-items: center; }
+            .toast { max-width: 100%; width: 100%; justify-content: center; }
+
+            /* Botões de ação maiores */
+            .busca-row { flex-direction: column; }
+            .busca-row .btn-camera { height: 48px; width: 100%; }
+
+            /* Header */
+            #header-nome-loja { font-size: 15px; }
+        }
+
+        @media (max-width: 380px) {
+            .stats-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -746,14 +817,14 @@
                     : '-';
                 lp.innerHTML += `
                     <tr class="${dV && dV < hj ? 'linha-vencida' : ''}">
-                        <td>${p.cod || '-'}</td>
-                        <td><strong>${p.nome}</strong></td>
-                        <td>${p.qtd}</td>
-                        <td>${fMoeda(p.preco)}</td>
-                        <td>${vencChip}</td>
-                        <td>
-                            <button class="btn-acao" style="background:#0984e3;" onclick="prepararEdicao('produtos',${i})" title="Editar">✎</button>
-                            <button class="btn-acao" style="background:#e74c3c;" onclick="remover('produtos',${i})" title="Remover">✕</button>
+                        <td data-label="Código">${p.cod || '-'}</td>
+                        <td data-label="Produto"><strong>${p.nome}</strong></td>
+                        <td data-label="Qtd">${p.qtd}</td>
+                        <td data-label="Preço">${fMoeda(p.preco)}</td>
+                        <td data-label="Validade">${vencChip}</td>
+                        <td data-label="Ações">
+                            <button class="btn-acao" style="background:#0984e3;" onclick="prepararEdicao('produtos',${i})" title="Editar">✎ Editar</button>
+                            <button class="btn-acao" style="background:#e74c3c;" onclick="remover('produtos',${i})" title="Remover">✕ Remover</button>
                         </td>
                     </tr>`;
             }
@@ -777,14 +848,14 @@
                 : '';
             lc.innerHTML += `
                 <tr>
-                    <td><strong>${c.nome}</strong></td>
-                    <td>${c.tel || '-'}</td>
-                    <td class="${divClass}">${fMoeda(divida)}</td>
-                    <td>
-                        <button class="btn-acao" style="background:var(--sucesso);" onclick="receber(${i})" title="Receber">R$</button>
+                    <td data-label="Nome"><strong>${c.nome}</strong></td>
+                    <td data-label="Telefone">${c.tel || '-'}</td>
+                    <td data-label="Dívida" class="${divClass}">${fMoeda(divida)}</td>
+                    <td data-label="Ações">
+                        <button class="btn-acao" style="background:var(--sucesso);" onclick="receber(${i})" title="Receber">💰 Receber</button>
                         ${waBtnHtml}
-                        <button class="btn-acao" style="background:#0984e3;" onclick="prepararEdicao('clientes',${i})" title="Editar">✎</button>
-                        <button class="btn-acao" style="background:#e74c3c;" onclick="remover('clientes',${i})" title="Remover">✕</button>
+                        <button class="btn-acao" style="background:#0984e3;" onclick="prepararEdicao('clientes',${i})" title="Editar">✎ Editar</button>
+                        <button class="btn-acao" style="background:#e74c3c;" onclick="remover('clientes',${i})" title="Remover">✕ Remover</button>
                     </td>
                 </tr>`;
         });
@@ -827,12 +898,12 @@
                 totalContas += parseFloat(f.valor) || 0;
                 lf.innerHTML += `
                     <tr class="${dV < hj ? 'linha-vencida' : ''}">
-                        <td>${f.desc}</td>
-                        <td>${fData(f.venc)}</td>
-                        <td>${fMoeda(f.valor)}</td>
-                        <td>
-                            <button class="btn-acao" style="background:#0984e3;" onclick="prepararEdicao('financeiro',${i})" title="Editar">✎</button>
-                            <button class="btn-acao" style="background:var(--sucesso);" onclick="remover('financeiro',${i})" title="Pago">✓</button>
+                        <td data-label="Descrição">${f.desc}</td>
+                        <td data-label="Vencimento">${fData(f.venc)}</td>
+                        <td data-label="Valor">${fMoeda(f.valor)}</td>
+                        <td data-label="Ações">
+                            <button class="btn-acao" style="background:#0984e3;" onclick="prepararEdicao('financeiro',${i})" title="Editar">✎ Editar</button>
+                            <button class="btn-acao" style="background:var(--sucesso);" onclick="remover('financeiro',${i})" title="Pago">✓ Pago</button>
                         </td>
                     </tr>`;
             });
