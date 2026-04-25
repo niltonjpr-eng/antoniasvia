@@ -21,14 +21,14 @@
             --ios-orange: #FF9500;
             --ios-purple: #AF52DE;
             --ios-teal: #5AC8FA;
-            --ios-bg: #000000;
-            --ios-bg-2: #1C1C1E;
-            --ios-bg-3: #2C2C2E;
-            --ios-bg-4: #3A3A3C;
-            --ios-label: #FFFFFF;
-            --ios-label-2: rgba(235,235,245,0.6);
-            --ios-label-3: rgba(235,235,245,0.3);
-            --ios-sep: rgba(84,84,88,0.65);
+            --ios-bg: #f0f0f5;
+            --ios-bg-2: #e2e2ea;
+            --ios-bg-3: #d5d5e0;
+            --ios-bg-4: #c8c8d5;
+            --ios-label: #1a1a2e;
+            --ios-label-2: rgba(30,30,60,0.6);
+            --ios-label-3: rgba(30,30,60,0.35);
+            --ios-sep: rgba(100,100,120,0.25);
             --ios-fill: rgba(120,120,128,0.2);
             --ios-fill-2: rgba(120,120,128,0.16);
             --ios-radius: 20px;
@@ -318,7 +318,7 @@
 
         /* ============ SCANNER ============ */
         #container-leitor {
-            display: none; position: fixed; inset: 0; background: #000; z-index: 20000;
+            display: none; position: fixed; inset: 0; background: #12121a; z-index: 20000;
             flex-direction: column; align-items: center; justify-content: center;
         }
         #reader { width: 100%; max-width: 500px; }
@@ -521,7 +521,7 @@
         </button>
         <button class="menu-btn" onclick="tab('estoque', this)">
             <span class="label">💄 Estoque</span>
-            <span id="badge-vencidos" class="badge" style="display:none">0</span>
+            <span id="badge-vencidos" class="badge-vencido" style="display:none">0</span>
         </button>
         <button class="menu-btn" onclick="tab('clientes', this)">
             <span class="label">👤 Clientes</span>
@@ -684,15 +684,31 @@
             <div class="grid">
                 <input type="text" id="conf-nome" placeholder="Nome da loja">
                 <input type="text" id="conf-tel" placeholder="Telefone / WhatsApp">
-                <input type="password" id="conf-senha" placeholder="Nova senha de acesso">
             </div>
             <button class="btn" onclick="salvarConfig()">SALVAR DADOS</button>
+            <hr class="divider">
+            <h4 style="margin-bottom:14px;">🔐 Trocar Senha</h4>
+            <div class="grid">
+                <div>
+                    <label class="label-campo">Senha atual</label>
+                    <input type="password" id="conf-senha-atual" placeholder="Digite a senha atual" inputmode="numeric">
+                </div>
+                <div>
+                    <label class="label-campo">Nova senha</label>
+                    <input type="password" id="conf-senha" placeholder="Nova senha" inputmode="numeric">
+                </div>
+                <div>
+                    <label class="label-campo">Confirmar nova senha</label>
+                    <input type="password" id="conf-senha-confirm" placeholder="Repita a nova senha" inputmode="numeric">
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="trocarSenha()">🔐 ALTERAR SENHA</button>
         </div>
 
         <div class="card card-accent-dark">
             <h3>💾 Backup e Segurança</h3>
 
-            <div style="background:#f0f4f8; border-radius:10px; padding:14px; margin-bottom:18px; font-size:13px; line-height:1.7; color:#444; border-left:4px solid #0984e3;">
+            <div style="background:var(--fundo-2); border-radius:10px; padding:14px; margin-bottom:18px; font-size:13px; line-height:1.7; color:var(--texto-suave); border-left:4px solid #0984e3;">
                 <strong style="display:block; margin-bottom:6px; color:#0984e3;">ℹ️ O que é o Backup?</strong>
                 O backup é um arquivo <strong>.json</strong> que contém <strong>todos os seus dados</strong>: produtos, clientes, contas, histórico de vendas e configurações. Salve regularmente para não perder informações em caso de falha ou troca de dispositivo.
             </div>
@@ -733,7 +749,7 @@
         <button class="bnav-btn" onclick="tab('estoque', this, 'bnav')" id="bnav-estoque">
             <span class="bnav-icon">📦</span>
             <span class="bnav-label">Estoque</span>
-            <span class="bnav-badge" id="bnav-badge-vencidos"></span>
+            <span class="bnav-badge" id="bnav-badge-vencidos" style="background:var(--aviso);color:#2a1a00;"></span>
         </button>
         <button class="bnav-btn" onclick="tab('clientes', this, 'bnav')" id="bnav-clientes">
             <span class="bnav-icon">👤</span>
@@ -761,7 +777,7 @@
         <div style="font-size:16px; font-weight:900; letter-spacing:1px;" id="rec-nome-loja"></div>
         <div style="font-size:11px;" id="rec-tel-loja"></div>
     </div>
-    <div style="border-top:2px solid #000; border-bottom:2px solid #000; text-align:center; padding:4px 0; margin:6px 0;">
+    <div style="border-top:2px solid #333; border-bottom:2px solid #333; text-align:center; padding:4px 0; margin:6px 0;">
         <strong style="font-size:13px; letter-spacing:2px;">RECIBO DE VENDA</strong>
     </div>
     <div style="font-size:11px; margin-bottom:4px;">
@@ -769,19 +785,19 @@
         <div id="rec-cliente-div" style="display:none;">Cliente: <strong><span id="rec-cliente-nome"></span></strong></div>
         <div id="rec-num-venda"></div>
     </div>
-    <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+    <div style="border-top:1px dashed #555; margin:6px 0;"></div>
     <div style="font-size:11px; font-weight:bold; display:flex; justify-content:space-between; margin-bottom:3px;">
         <span>PRODUTO (QTD)</span><span>VALOR</span>
     </div>
-    <div style="border-top:1px dashed #000; margin-bottom:4px;"></div>
+    <div style="border-top:1px dashed #555; margin-bottom:4px;"></div>
     <div id="rec-itens" style="font-size:11px;"></div>
-    <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+    <div style="border-top:1px dashed #555; margin:6px 0;"></div>
     <div style="display:flex; justify-content:space-between; font-size:13px;">
         <strong>TOTAL:</strong>
         <strong id="rec-total"></strong>
     </div>
     <div id="rec-forma-pag" style="font-size:11px; text-align:right; margin-top:2px; color:#555;"></div>
-    <div style="border-top:1px dashed #000; margin:8px 0;"></div>
+    <div style="border-top:1px dashed #555; margin:8px 0;"></div>
     <div style="text-align:center; font-size:10px; color:#555;">
         <div>Obrigada pela preferência! 💄</div>
         <div id="rec-rodape-loja" style="margin-top:2px;"></div>
@@ -1318,17 +1334,31 @@
         document.getElementById('header-nome-loja').textContent = nome;
     }
 
+    function trocarSenha() {
+        const atual   = document.getElementById('conf-senha-atual').value;
+        const nova    = document.getElementById('conf-senha').value;
+        const confirm = document.getElementById('conf-senha-confirm').value;
+        const senhaCorreta = db.config?.senha || "1234";
+        if (!atual || !nova || !confirm) return toast("Preencha todos os campos!", 'aviso');
+        if (atual !== senhaCorreta) return toast("Senha atual incorreta!", 'erro');
+        if (nova.length < 4) return toast("Nova senha deve ter ao menos 4 caracteres!", 'aviso');
+        if (nova !== confirm) return toast("As senhas não coincidem!", 'erro');
+        db.config.senha = nova;
+        salvar();
+        document.getElementById('conf-senha-atual').value = '';
+        document.getElementById('conf-senha').value = '';
+        document.getElementById('conf-senha-confirm').value = '';
+        toast("Senha alterada com sucesso! ✅");
+    }
+
     function salvarConfig() {
         const nome  = document.getElementById('conf-nome').value.trim();
         const tel   = document.getElementById('conf-tel').value.trim();
-        const senha = document.getElementById('conf-senha').value;
         if (nome)  db.config.nome      = nome;
         if (tel)   db.config.telefone  = tel;
-        if (senha) db.config.senha     = senha;
         salvar();
         atualizarNomeLoja();
         toast("Configurações salvas!");
-        document.getElementById('conf-senha').value = '';
     }
 
     // ============ RELATÓRIOS ============
