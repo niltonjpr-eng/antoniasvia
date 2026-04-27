@@ -1153,64 +1153,57 @@
         nomeInput.placeholder = '🔍 Buscando...';
         nomeInput.disabled = true;
 
-        const apis = [
-            // Open Food Facts - Brasil
-            async () => {
-                const r = await fetch('https://world.openfoodfacts.org/api/v2/product/' + cod + '?fields=product_name_pt,product_name,brands,categories', {headers:{'User-Agent':'BellaGestao/1.0'}});
-                const d = await r.json();
-                if (d.status === 1 && d.product) {
-                    const nome = d.product.product_name_pt || d.product.product_name || '';
-                    const marca = d.product.brands ? d.product.brands.split(',')[0].trim() : '';
-                    return nome ? (marca ? nome + ' ' + marca : nome) : (marca || null);
-                }
-                return null;
-            },
-            // Open Food Facts v0 fallback
-            async () => {
-                const r = await fetch('https://br.openfoodfacts.org/api/v0/product/' + cod + '.json');
-                const d = await r.json();
-                if (d.status === 1 && d.product) {
-                    const nome = d.product.product_name_pt || d.product.product_name || d.product.generic_name_pt || d.product.generic_name || '';
-                    const marca = d.product.brands ? d.product.brands.split(',')[0].trim() : '';
-                    return nome ? (marca ? nome + ' ' + marca : nome) : (marca || null);
-                }
-                return null;
-            },
-            // UPCitemdb
-            async () => {
-                const r = await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc=' + cod);
-                const d = await r.json();
-                if (d.code === 'OK' && d.items && d.items[0] && d.items[0].title) {
-                    return d.items[0].title;
-                }
-                return null;
-            },
-            // Barcodelookup via allorigins proxy
-            async () => {
-                const url = 'https://www.barcodelookup.com/' + cod;
-                const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url));
-                const d = await r.json();
-                const match = d.contents && d.contents.match(/<span class="product-name">([^<]+)<\/span>/);
-                return match ? match[1].trim() : null;
-            }
-        ];
+        const proxy = 'https://api.allorigins.win/get?url=';
+        const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej('timeout'), ms));
 
-        for (const api of apis) {
+        const tentativa = async (fetchFn) => {
             try {
-                const nome = await api();
-                if (nome) {
-                    nomeInput.value = nome;
-                    nomeInput.placeholder = 'Nome do produto';
-                    nomeInput.disabled = false;
-                    toast('✅ Produto encontrado: ' + nome);
-                    return;
-                }
-            } catch(e) { /* tenta próxima */ }
-        }
+                return await Promise.race([fetchFn(), timeout(5000)]);
+            } catch { return null; }
+        };
 
-        nomeInput.placeholder = 'Nome do produto';
+        // Todas as APIs ao mesmo tempo — pega a primeira que responder com resultado
+        const [r1, r2, r3] = await Promise.all([
+            tentativa(async () => {
+                const url = 'https://world.openfoodfacts.org/api/v2/product/' + cod + '?fields=product_name_pt,product_name,brands';
+                const r = await fetch(proxy + encodeURIComponent(url));
+                const d = await r.json();
+                const p = JSON.parse(d.contents);
+                if (p.status === 1 && p.product) {
+                    const nome = p.product.product_name_pt || p.product.product_name || '';
+                    const marca = p.product.brands ? p.product.brands.split(',')[0].trim() : '';
+                    return nome ? (marca ? nome + ' ' + marca : nome) : marca || null;
+                }
+                return null;
+            }),
+            tentativa(async () => {
+                const url = 'https://api.upcitemdb.com/prod/trial/lookup?upc=' + cod;
+                const r = await fetch(proxy + encodeURIComponent(url));
+                const d = await r.json();
+                const p = JSON.parse(d.contents);
+                return (p.code === 'OK' && p.items?.[0]?.title) ? p.items[0].title : null;
+            }),
+            tentativa(async () => {
+                const url = 'https://api.cosmos.bluesoft.com.br/gtins/' + cod;
+                const r = await fetch(proxy + encodeURIComponent(url));
+                const d = await r.json();
+                const p = JSON.parse(d.contents);
+                return p?.description ? p.description + (p.brand?.name ? ' ' + p.brand.name : '') : null;
+            })
+        ]);
+
+        const nome = (r1 || r2 || r3 || '').trim();
+
         nomeInput.disabled = false;
-        toast('Produto não encontrado na web. Preencha manualmente.', 'aviso');
+        if (nome && nome.length > 2) {
+            nomeInput.value = nome;
+            nomeInput.placeholder = 'Nome do produto';
+            toast('✅ ' + nome);
+        } else {
+            nomeInput.placeholder = 'Nome do produto';
+            toast('Não encontrado. Preencha manualmente.', 'aviso');
+            window.open('https://www.google.com/search?q=' + cod + '+produto', '_blank');
+        }
     }
 
     function prepararEdicao(tipo, i) {
