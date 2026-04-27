@@ -591,7 +591,7 @@
             <div class="grid">
                 <input type="text" id="p-nome" placeholder="Nome do produto">
                 <div style="display: flex; gap: 8px;">
-                    <input type="text" id="p-cod" placeholder="Código de barras">
+                    <input type="text" id="p-cod" placeholder="Código de barras" oninput="buscarProdutoPorCodigo(this.value)">
                     <button class="btn-camera" onclick="abrirLeitorEstoque()" title="Câmera">📷</button>
                 </div>
                 <input type="number" id="p-qtd" placeholder="Quantidade">
@@ -1109,6 +1109,108 @@
         else db.financeiro.push(f);
         limparCamposFinanceiro(); salvar();
         toast("Conta lançada!");
+    }
+
+    let buscaTimer = null;
+
+    function buscarProdutoPorCodigo(cod) {
+        if (!cod || cod.length < 3) return;
+
+        // Primeiro verifica no estoque local
+        const idx = db.produtos.findIndex(p => p.cod && p.cod.trim() === cod.trim());
+        if (idx !== -1) {
+            const p = db.produtos[idx];
+            document.getElementById('p-nome').value  = p.nome  || '';
+            document.getElementById('p-qtd').value   = p.qtd   || '';
+            document.getElementById('p-preco').value = p.preco || '';
+            document.getElementById('p-venc').value  = p.venc  || '';
+            document.getElementById('titulo-estoque').textContent = '✏️ Editando: ' + p.nome;
+            document.getElementById('btn-estoque').textContent = 'SALVAR ALTERAÇÕES';
+            indexEdicao.produtos = idx;
+            toast('Produto encontrado no estoque ✅');
+            return;
+        }
+
+        // Limpa campos se mudou de produto
+        if (indexEdicao.produtos !== -1) {
+            document.getElementById('p-nome').value  = '';
+            document.getElementById('p-qtd').value   = '';
+            document.getElementById('p-preco').value = '';
+            document.getElementById('p-venc').value  = '';
+            document.getElementById('titulo-estoque').textContent = '💄 Cadastrar Produto';
+            document.getElementById('btn-estoque').textContent = 'CADASTRAR PRODUTO';
+            indexEdicao.produtos = -1;
+        }
+
+        // Debounce: espera parar de digitar antes de buscar na web
+        clearTimeout(buscaTimer);
+        if (cod.length < 6) return;
+        buscaTimer = setTimeout(() => buscarNaWeb(cod), 800);
+    }
+
+    async function buscarNaWeb(cod) {
+        const nomeInput = document.getElementById('p-nome');
+        nomeInput.placeholder = '🔍 Buscando...';
+        nomeInput.disabled = true;
+
+        const apis = [
+            // Open Food Facts - Brasil
+            async () => {
+                const r = await fetch('https://world.openfoodfacts.org/api/v2/product/' + cod + '?fields=product_name_pt,product_name,brands,categories', {headers:{'User-Agent':'BellaGestao/1.0'}});
+                const d = await r.json();
+                if (d.status === 1 && d.product) {
+                    const nome = d.product.product_name_pt || d.product.product_name || '';
+                    const marca = d.product.brands ? d.product.brands.split(',')[0].trim() : '';
+                    return nome ? (marca ? nome + ' ' + marca : nome) : (marca || null);
+                }
+                return null;
+            },
+            // Open Food Facts v0 fallback
+            async () => {
+                const r = await fetch('https://br.openfoodfacts.org/api/v0/product/' + cod + '.json');
+                const d = await r.json();
+                if (d.status === 1 && d.product) {
+                    const nome = d.product.product_name_pt || d.product.product_name || d.product.generic_name_pt || d.product.generic_name || '';
+                    const marca = d.product.brands ? d.product.brands.split(',')[0].trim() : '';
+                    return nome ? (marca ? nome + ' ' + marca : nome) : (marca || null);
+                }
+                return null;
+            },
+            // UPCitemdb
+            async () => {
+                const r = await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc=' + cod);
+                const d = await r.json();
+                if (d.code === 'OK' && d.items && d.items[0] && d.items[0].title) {
+                    return d.items[0].title;
+                }
+                return null;
+            },
+            // Barcodelookup via allorigins proxy
+            async () => {
+                const url = 'https://www.barcodelookup.com/' + cod;
+                const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url));
+                const d = await r.json();
+                const match = d.contents && d.contents.match(/<span class="product-name">([^<]+)<\/span>/);
+                return match ? match[1].trim() : null;
+            }
+        ];
+
+        for (const api of apis) {
+            try {
+                const nome = await api();
+                if (nome) {
+                    nomeInput.value = nome;
+                    nomeInput.placeholder = 'Nome do produto';
+                    nomeInput.disabled = false;
+                    toast('✅ Produto encontrado: ' + nome);
+                    return;
+                }
+            } catch(e) { /* tenta próxima */ }
+        }
+
+        nomeInput.placeholder = 'Nome do produto';
+        nomeInput.disabled = false;
+        toast('Produto não encontrado na web. Preencha manualmente.', 'aviso');
     }
 
     function prepararEdicao(tipo, i) {
