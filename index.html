@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="screen-orientation" content="portrait">
     <title>Bella Gestão Pro</title>
     <!-- Usa SF Pro nativa do iOS -->
     
@@ -901,6 +902,11 @@
     });
 
     function salvar() { database.ref('sistema').set(db); }
+
+    // Travar tela em portrait
+    try {
+        screen.orientation.lock('portrait').catch(() => {});
+    } catch(e) {}
 
     // ============ UTILITÁRIOS ============
     function fData(dataISO) {
