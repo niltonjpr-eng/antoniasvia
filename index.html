@@ -1044,11 +1044,17 @@
         // --- PDV Selects ---
         const vProd = document.getElementById('v-prod');
         vProd.innerHTML = '<option value="">Selecione o Produto...</option>';
-        db.produtos.forEach((p, i) => vProd.innerHTML += `<option value="${i}">${p.nome} — ${fMoeda(p.preco)}</option>`);
+        db.produtos
+            .map((p, i) => ({ ...p, _idx: i }))
+            .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+            .forEach(p => vProd.innerHTML += `<option value="${p._idx}">${p.nome} — ${fMoeda(p.preco)}</option>`);
 
         const vCli = document.getElementById('v-cli');
         vCli.innerHTML = '<option value="">💵 À VISTA (Balcão)</option>';
-        db.clientes.forEach((c, i) => vCli.innerHTML += `<option value="${i}">${c.nome}</option>`);
+        db.clientes
+            .map((c, i) => ({ ...c, _idx: i }))
+            .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+            .forEach(c => vCli.innerHTML += `<option value="${c._idx}">${c.nome}</option>`);
 
         // --- Histórico ---
         const lh = document.getElementById('lista-historico-vendas');
