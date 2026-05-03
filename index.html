@@ -559,8 +559,12 @@
                 <button class="btn-camera" onclick="buscarProdutoManual()" title="Buscar">🔍</button>
                 <button class="btn-camera" onclick="abrirLeitor()" title="Câmera">📷</button>
             </div>
-            <div class="grid">
-                <select id="v-prod"></select>
+            <div style="position:relative; margin-bottom:10px;">
+                <input type="text" id="v-prod-busca" placeholder="🔍 Digite o nome do produto..." oninput="filtrarProdutosPDV(this.value)" autocomplete="off">
+                <div id="v-prod-lista" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid rgba(194,24,91,0.2); border-radius:12px; box-shadow:0 8px 24px rgba(194,24,91,0.12); z-index:900; max-height:220px; overflow-y:auto; margin-top:4px;"></div>
+                <input type="hidden" id="v-prod">
+            </div>
+            <div class="grid-2" style="margin-bottom:10px;">
                 <input type="number" id="v-qtd" value="1" min="1" placeholder="Qtd">
                 <select id="v-cli"></select>
             </div>
@@ -1124,6 +1128,59 @@
     }
 
     let buscaTimer = null;
+
+    // ============ AUTOCOMPLETE PDV ============
+    let prodSelecionadoIdx = -1;
+
+    function filtrarProdutosPDV(termo) {
+        const lista = document.getElementById('v-prod-lista');
+        const hiddenInput = document.getElementById('v-prod');
+        hiddenInput.value = '';
+        prodSelecionadoIdx = -1;
+
+        if (!termo || termo.length < 1) {
+            lista.style.display = 'none';
+            return;
+        }
+
+        const t = termo.toLowerCase();
+        const resultados = db.produtos
+            .map((p, i) => ({ ...p, _idx: i }))
+            .filter(p => p.nome.toLowerCase().includes(t) || (p.cod && p.cod.includes(t)))
+            .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+            .slice(0, 8);
+
+        if (resultados.length === 0) {
+            lista.style.display = 'none';
+            return;
+        }
+
+        lista.innerHTML = resultados.map(p => `
+            <div onclick="selecionarProdutoPDV(${p._idx}, '${p.nome.replace(/'/g,"\'")}')">
+                <div>
+                    <div class="prod-nome">${p.nome}</div>
+                    <div class="prod-qtd">Estoque: ${p.qtd}</div>
+                </div>
+                <span class="prod-preco">${fMoeda(p.preco)}</span>
+            </div>
+        `).join('');
+        lista.style.display = 'block';
+    }
+
+    function selecionarProdutoPDV(idx, nome) {
+        document.getElementById('v-prod').value = idx;
+        document.getElementById('v-prod-busca').value = nome;
+        document.getElementById('v-prod-lista').style.display = 'none';
+        document.getElementById('v-qtd').focus();
+    }
+
+    // Fecha lista ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#v-prod-busca') && !e.target.closest('#v-prod-lista')) {
+            const lista = document.getElementById('v-prod-lista');
+            if (lista) lista.style.display = 'none';
+        }
+    });
 
     function buscarProdutoPorCodigo(cod) {
         if (!cod || cod.length < 3) return;
